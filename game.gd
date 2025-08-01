@@ -23,9 +23,6 @@ func _ready() -> void:
 		i+=1
 		#print(card.get_info())
 	await updraw()
-	#for i in deck.get_children():
-		#trash_card(i)
-		#await get_tree().create_timer(0.03).timeout
 
 func generate_cards():
 	for suit in range (suits.size()):
@@ -33,7 +30,7 @@ func generate_cards():
 			#var card_instance: Card = Card.new(i, value)
 			var card_instance : Card = card_path.instantiate()
 			deck.add_child(card_instance)
-			card_instance.set_info(suit, value)
+			card_instance.set_info(suit, floor(value * 0.5))
 			card_instance.connect("selected", card_selected)
 
 func shuffle_card():
@@ -43,7 +40,8 @@ func shuffle_card():
 		deck.remove_child(child)
 	for child in children:
 		deck.add_child(child)
-		
+
+
 func _physics_process(delta: float) -> void:
 	if state != State.IDLE:
 		return
@@ -52,6 +50,23 @@ func _physics_process(delta: float) -> void:
 			discard(c)
 		for c in hand.get_children():
 			discard(c)
+		return
+		
+	if board.get_child(0).value == board.get_child(1).value and board.get_child(0).value == board.get_child(2).value:
+		state = State.TWEENING
+		var card_from_deck : Card = null
+		for c in deck.get_children():
+			if c.value == board.get_child(0).value:
+				card_from_deck = c
+				deck.remove_child(card_from_deck)
+				board.add_child(card_from_deck)
+				var t : Tween = create_tween()
+				t.tween_property(card_from_deck, "position", get_viewport_rect().size / 2 + Vector2(-370, -100), 0.7)
+				await t.finished
+				break
+		for c in board.get_children():
+			discard(c)
+		await updraw()
 		return
 		
 	if board.get_child(0).suit == board.get_child(1).suit and board.get_child(0).suit == board.get_child(2).suit:
