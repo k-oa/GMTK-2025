@@ -10,7 +10,7 @@ var selected_card : Card
 var state : int = State.IDLE
 var suits = ["♥️", "♣️", "♦️", "♠️"]
 
-var hand_limit : int = 4
+var hand_limit : int = 3
 
 func _ready() -> void:
 	
@@ -30,7 +30,7 @@ func generate_cards():
 			#var card_instance: Card = Card.new(i, value)
 			var card_instance : Card = card_path.instantiate()
 			deck.add_child(card_instance)
-			card_instance.set_info(suit, floor(value * 0.5))
+			card_instance.set_info(suit, value)
 			card_instance.connect("selected", card_selected)
 
 func shuffle_card():
@@ -140,7 +140,10 @@ func updraw():
 
 
 func card_selected(card:Card):
-	
+	if card in deck.get_children():
+		return
+	if card in trash.get_children() and not card == trash.get_children()[-1]:
+		return
 	if not selected_card:
 		selected_card = card
 		return
@@ -165,4 +168,4 @@ func card_selected(card:Card):
 	await t.finished
 	await t2.finished
 	state = State.IDLE
-	print('d')
+	prints(card.value, card.suit)
